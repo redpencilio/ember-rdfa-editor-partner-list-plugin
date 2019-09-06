@@ -1,6 +1,9 @@
 import { reads } from '@ember/object/computed';
 import Component from '@ember/component';
 import layout from '../../templates/components/editor-plugins/partner-list-card';
+import { computed }  from '@ember/object';
+import { A }  from '@ember/array';
+import { inject as service } from '@ember/service';
 
 /**
 * Card displaying a hint of the Date plugin
@@ -11,6 +14,27 @@ import layout from '../../templates/components/editor-plugins/partner-list-card'
 */
 export default Component.extend({
   layout,
+  store: service(),
+  partners: A([]),
+
+  availableOrganizations: computed('partners.[]', function(){
+    return this.organizations.filter(p => ! this.partners.includes(p)).sortBy('firstname');
+  }),
+
+  innerHTML: computed('attendees.[]', function(){
+    return '<ul>'
+      + this.partners
+            .map(organization => `
+              <li property="notable:meetingAttendee"
+                  typeof="org:Membership">
+                <img property="notable:hasLogo"
+                     alt="${organization.title}'s logo"
+                     src="${organization.logo}">
+              </li>
+            `)
+            .join('')
+      + '</ul>';
+  }),
 
   /**
    * Region on which the card applies
@@ -44,11 +68,31 @@ export default Component.extend({
   */
   hintsRegistry: reads('info.hintsRegistry'),
 
+  async init() {
+    this._super(...arguments);
+    this.set('organizations', await this.store.findAll('organization'));
+  },
+
   actions: {
-    insert(){
-      this.get('hintsRegistry').removeHintsAtLocation(this.get('location'), this.get('hrId'), 'editor-plugins/partner-list-card');
+    addPartner (partner) {
+      this.partners.pushObject(partner);
+    },
+
+    commit(){
       const mappedLocation = this.get('hintsRegistry').updateLocationToCurrentIndex(this.get('hrId'), this.get('location'));
-      this.get('editor').replaceTextWithHTML(...mappedLocation, this.get('info').htmlString);
+      this.get('hintsRegistry').removeHintsAtLocation(mappedLocation, this.get('hrId'), 'editor-plugins/partner-list-card');
+
+      const selection = this.editor.selectContext(mappedLocation, { datatype: this.info.datatype });
+      this.editor.update(selection, {
+        set: {
+          innerHTML: this.innerHTML
+        }
+      });
+      this.hintsRegistry.removeHintsAtLocation(this.location, this.hrId, this.who);
+    },
+
+    removePartner (partner) {
+      this.partners.removeObject(partner);
     }
   }
 });
