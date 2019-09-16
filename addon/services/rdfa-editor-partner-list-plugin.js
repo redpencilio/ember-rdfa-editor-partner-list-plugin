@@ -99,9 +99,8 @@ const RdfaEditorPartnerListPlugin = Service.extend({
     return EmberObject.create({
       info: {
         label: this.get('who'),
-        plainValue: hint.text,
-        htmlString: '<b>hello world</b>',
         location: hint.location,
+        typeof: 'http://data.notable.redpencil.io/#PartnerList',
         hrId, hintsRegistry, editor
       },
       location: hint.location,
