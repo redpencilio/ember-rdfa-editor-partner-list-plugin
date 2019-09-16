@@ -21,19 +21,22 @@ export default Component.extend({
     return this.organizations.filter(p => ! this.partners.includes(p)).sortBy('firstname');
   }),
 
-  innerHTML: computed('attendees.[]', function(){
-    return '<ul>'
-      + this.partners
-            .map(organization => `
-              <li property="notable:meetingAttendee"
-                  typeof="org:Membership">
-                <img property="notable:hasLogo"
-                     alt="${organization.title}'s logo"
-                     src="${organization.logo}">
-              </li>
-            `)
-            .join('')
-      + '</ul>';
+  innerHTML: computed('partners.[]', function(){
+    const list = this.partners.map( organization => `
+    <div class="item">
+      <img property="notable:hasLogo"
+        alt="${organization.title}'s logo"
+        src="${organization.logo}" />
+    </div>
+  `);
+
+    return `
+      <div class="text-gray-500 italic">
+        <i class="edit icon"></i> Edit the list
+      </div>
+      <div class="row">
+        ${list.join('')}
+      </div>`;
   }),
 
   /**
