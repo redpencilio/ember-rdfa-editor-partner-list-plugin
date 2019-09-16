@@ -1,7 +1,7 @@
 /* eslint-disable require-yield */
 import { getOwner } from '@ember/application';
 import Service from '@ember/service';
-import EmberObject, { computed } from '@ember/object';
+import EmberObject from '@ember/object';
 import { task } from 'ember-concurrency';
 
 /**
@@ -63,8 +63,6 @@ const RdfaEditorPartnerListPlugin = Service.extend({
            lastTriple.object === 'http://data.notable.redpencil.io/#PartnerList';
   },
 
-
-
   /**
    * Maps location of substring back within reference location
    *
@@ -125,6 +123,7 @@ const RdfaEditorPartnerListPlugin = Service.extend({
     const text = context.text.slice(index, index+5);
     const location = this.normalizeLocation([index, index + 5], context.region);
     hints.push({text, location});
+
     return hints;
   }
 });
